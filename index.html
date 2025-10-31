@@ -12,6 +12,20 @@
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 font-sans transition-colors">
 <div class="min-h-screen flex flex-col items-center justify-center p-4 sm:p-6" id="app">
+    <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50" v-if="showAudioPrompt">
+        <div class="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg p-6 max-w-md mx-4 text-center">
+            <p class="mb-4">{{ t('enableSoundPrompt') }}</p>
+            <div class="flex flex-col sm:flex-row justify-center sm:space-x-3 space-y-3 sm:space-y-0">
+                <button @click="acceptAudioPrompt" class="px-4 py-2 bg-blue-600 text-white rounded">
+                    {{ t('enableSoundButton') }}
+                </button>
+                <button @click="dismissAudioPrompt" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded">
+                    {{ t('dismissSoundButton') }}
+                </button>
+            </div>
+        </div>
+    </div>
+
     <main class="text-center max-w-full sm:max-w-xl px-4 sm:px-0">
         <h1 class="text-3xl sm:text-4xl font-bold mb-4">{{ t('title') }}</h1>
         <p class="text-base sm:text-lg mb-8">{{ t('subtitle') }}</p>
@@ -45,12 +59,12 @@
 
         <div class="mt-6 flex items-center justify-center space-x-3 text-sm text-gray-600 dark:text-gray-300">
             <span class="font-medium mr-2">{{ t('languageLabel') }}</span>
-            <div class="flex space-x-2">
+            <div class="flex flex-wrap gap-2">
                 <button
                         :class="[
-                        'px-2 py-1 rounded text-sm focus:outline-none',
-                        currentLang === opt.code ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
-                    ]"
+                         'px-2 py-1 rounded text-sm focus:outline-none',
+                         currentLang === opt.code ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
+                     ]"
                         :key="opt.code"
                         @click="currentLang = opt.code"
                         type="button"
@@ -59,6 +73,12 @@
                     {{ opt.label }}
                 </button>
             </div>
+            <button :title="audioEnabled ? 'Desativar som' : 'Ativar som'"
+                    @click="toggleSound"
+                    class="ml-3 px-2 py-1 rounded text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                <span v-if="audioEnabled">🔊</span>
+                <span v-else>🔈</span>
+            </button>
         </div>
 
         <footer class="mt-10 text-gray-400 text-xs text-center">
@@ -70,7 +90,7 @@
 </div>
 
 <script>
-    const {createApp, ref, onMounted, watch} = Vue;
+    const {createApp, ref, onMounted, watch, onBeforeUnmount} = Vue;
 
     createApp({
         setup() {
@@ -78,6 +98,16 @@
             const showingBadExample = ref(true);
             const currentMessages = ref([]);
             let messageInterval = null;
+            let restartDebounce = null;
+            const AUDIO_KEY = 'nb-audio-allowed';
+
+            let storedPref = null;
+            try {
+                storedPref = localStorage.getItem(AUDIO_KEY);
+            } catch (e) {
+                storedPref = null;
+            }
+            const preferenceExists = (storedPref === 'true' || storedPref === 'false');
 
             function detectBrowserLang() {
                 const navs = (navigator.languages && navigator.languages.length) ? navigator.languages : [navigator.language || navigator.userLanguage || 'pt'];
@@ -92,6 +122,9 @@
 
             const translations = {
                 pt: {
+                    enableSoundPrompt: 'Clique para ativar o som das mensagens (recomendado).',
+                    enableSoundButton: 'Ativar som',
+                    dismissSoundButton: 'Não, obrigado',
                     languageLabel: 'Idioma:',
                     title: 'Por favor, não mande mensagens quebradas.',
                     subtitle: 'Evite mandar uma linha por vez. Escreva sua mensagem de forma completa — é mais claro e educado.',
@@ -107,6 +140,9 @@
                     messagesGood: ['Oi, tudo bem? Preciso te pedir um favor. Pode me ajudar? Preciso de tal e tal coisa.']
                 },
                 en: {
+                    enableSoundPrompt: 'Click to enable message sound (recommended).',
+                    enableSoundButton: 'Enable sound',
+                    dismissSoundButton: 'No, thanks',
                     languageLabel: 'Language:',
                     title: "Please don't send broken messages.",
                     subtitle: 'Avoid sending one line at a time. Write your message completely — it’s clearer and more polite.',
@@ -122,6 +158,9 @@
                     messagesGood: ['Hi, how are you? I need to ask a favor. Can you help me? I need something specific.']
                 },
                 es: {
+                    enableSoundPrompt: 'Haz clic para activar el sonido de los mensajes (recomendado).',
+                    enableSoundButton: 'Activar sonido',
+                    dismissSoundButton: 'No, gracias',
                     languageLabel: 'Idioma:',
                     title: 'Por favor, no envíes mensajes fragmentados.',
                     subtitle: 'Evita enviar uma línea a la vez. Escribe tu mensaje completo — es más claro e cortés.',
@@ -137,6 +176,9 @@
                     messagesGood: ['Hola, ¿cómo estás? Necesito pedirte un favor. ¿Me puedes ayudar? Necesito algo en particular.']
                 },
                 fr: {
+                    enableSoundPrompt: 'Cliquez pour activer le son des messages (recommandé).',
+                    enableSoundButton: 'Activer le son',
+                    dismissSoundButton: 'Non, merci',
                     languageLabel: 'Langue :',
                     title: "S'il vous plaît, n'envoyez pas de messages morcelés.",
                     subtitle: 'Évitez d’envoyer une ligne à la fois. Écrivez votre message en entier — c’est plus clair et poli.',
@@ -152,6 +194,9 @@
                     messagesGood: ["Salut, ça va? J'ai besoin de te demander une faveur. Peux-tu m'aider? J'ai besoin de quelque chose de précis."]
                 },
                 de: {
+                    enableSoundPrompt: 'Klicken, um den Nachrichtenton zu aktivieren (empfohlen).',
+                    enableSoundButton: 'Ton aktivieren',
+                    dismissSoundButton: 'Nein, danke',
                     languageLabel: 'Sprache:',
                     title: 'Bitte sende keine zerpflückten Nachrichten.',
                     subtitle: 'Vermeide es, eine Zeile nach der anderen zu senden. Schreibe deine Nachricht vollständig — das ist klarer und höflicher.',
@@ -180,21 +225,97 @@
                 return translations[currentLang.value][key] || key;
             }
 
+            const audioEnabled = ref(storedPref !== 'false');
+            let audioCtx = null;
+            const showAudioPrompt = ref(!preferenceExists && audioEnabled.value);
+
+            function setAudioPreference(enabled) {
+                try {
+                    localStorage.setItem(AUDIO_KEY, enabled ? 'true' : 'false');
+                } catch (e) {
+                }
+                showAudioPrompt.value = false;
+                audioEnabled.value = !!enabled;
+                if (enabled) {
+                    const ctx = ensureAudioCtx();
+                    if (ctx && ctx.state === 'suspended') ctx.resume().catch(() => {
+                    });
+                    playBeep();
+                }
+            }
+
+            function acceptAudioPrompt() {
+                setAudioPreference(true);
+                playChatDemo();
+            }
+
+            function dismissAudioPrompt() {
+                setAudioPreference(false);
+                playChatDemo();
+            }
+
+            function ensureAudioCtx() {
+                const C = window.AudioContext || window.webkitAudioContext;
+                if (!C) return null;
+                if (!audioCtx) audioCtx = new C();
+                return audioCtx;
+            }
+
+            function playBeep() {
+                try {
+                    const ctx = ensureAudioCtx();
+                    if (!ctx) return;
+                    if (ctx.state === 'suspended') {
+                        ctx.resume().catch(() => {
+                        });
+                    }
+                    const now = ctx.currentTime;
+                    const o = ctx.createOscillator();
+                    const g = ctx.createGain();
+                    o.type = 'sine';
+                    o.frequency.setValueAtTime(880, now);
+                    g.gain.setValueAtTime(0.0001, now);
+                    o.connect(g);
+                    g.connect(ctx.destination);
+                    g.gain.exponentialRampToValueAtTime(0.12, now + 0.01);
+                    g.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+                    o.start(now);
+                    o.stop(now + 0.2);
+                } catch (e) {
+                }
+            }
+
+            function toggleSound() {
+                audioEnabled.value = !audioEnabled.value;
+                try {
+                    localStorage.setItem(AUDIO_KEY, audioEnabled.value ? 'true' : 'false');
+                } catch (e) {
+                }
+                if (audioEnabled.value) {
+                    const ctx = ensureAudioCtx();
+                    if (ctx && ctx.state === 'suspended') ctx.resume().catch(() => {
+                    });
+                }
+            }
+
             function playChatDemo() {
-                clearInterval(messageInterval);
+                if (showAudioPrompt && showAudioPrompt.value) return;
+                if (messageInterval) clearTimeout(messageInterval);
                 currentMessages.value = [];
                 const lang = currentLang.value in translations ? currentLang.value : 'pt';
-                const selectedMessages = showingBadExample.value ? translations[lang].messagesBad : translations[lang].messagesGood;
+                const selected = showingBadExample.value ? translations[lang].messagesBad : translations[lang].messagesGood;
 
-                let i = 0;
-                messageInterval = setInterval(() => {
-                    if (i < selectedMessages.length) {
-                        currentMessages.value.push(selectedMessages[i]);
-                        i++;
-                    } else {
-                        clearInterval(messageInterval);
+                const showNext = (i) => {
+                    if (i >= selected.length) {
+                        messageInterval = null;
+                        return;
                     }
-                }, 1000);
+                    currentMessages.value.push(selected[i]);
+                    if (audioEnabled.value) playBeep();
+                    messageInterval = setTimeout(() => showNext(i + 1), 1000);
+                };
+
+                showNext(0);
             }
 
             function toggleChatExample() {
@@ -203,15 +324,47 @@
             }
 
             watch(currentLang, () => {
-                playChatDemo();
+                if (restartDebounce) clearTimeout(restartDebounce);
+                restartDebounce = setTimeout(() => {
+                    playChatDemo();
+                    restartDebounce = null;
+                }, 200);
+            });
+
+            onBeforeUnmount(() => {
+                if (messageInterval) clearTimeout(messageInterval);
+                if (restartDebounce) clearTimeout(restartDebounce);
             });
 
             onMounted(() => {
                 currentLang.value = detectBrowserLang();
+                try {
+                    if (storedPref === 'true') {
+                        const ctx = ensureAudioCtx();
+                        if (ctx && ctx.state === 'suspended') ctx.resume().catch(() => {
+                        });
+                    } else if (!preferenceExists) {
+                        if (audioEnabled.value) showAudioPrompt.value = true;
+                        return;
+                    }
+                } catch (e) {
+                }
                 playChatDemo();
             });
 
-            return {t, currentMessages, showingBadExample, toggleChatExample, currentLang, langOptions};
+            return {
+                t,
+                currentMessages,
+                showingBadExample,
+                toggleChatExample,
+                currentLang,
+                langOptions,
+                audioEnabled,
+                toggleSound,
+                showAudioPrompt,
+                acceptAudioPrompt,
+                dismissAudioPrompt
+            };
         }
     }).mount('#app');
 </script>
@@ -227,5 +380,10 @@
 
     gtag('config', 'G-9RNCT8DE6N');
 </script>
+<script data-cfasync="false" data-color="#40DCA5" data-description="Support me on Buy me a coffee!"
+        data-id="joncostasig" data-message="Thank you!" data-name="BMC-Widget"
+        data-position="Right" data-x_margin="18" data-y_margin="18"
+        src="https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js"></script>
 </body>
 </html>
+
