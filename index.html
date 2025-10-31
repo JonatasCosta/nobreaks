@@ -43,9 +43,28 @@
             </ul>
         </section>
 
+        <div class="mt-6 flex items-center justify-center space-x-3 text-sm text-gray-600 dark:text-gray-300">
+            <span class="font-medium mr-2">{{ t('languageLabel') }}</span>
+            <div class="flex space-x-2">
+                <button
+                        :class="[
+                        'px-2 py-1 rounded text-sm focus:outline-none',
+                        currentLang === opt.code ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
+                    ]"
+                        :key="opt.code"
+                        @click="currentLang = opt.code"
+                        type="button"
+                        v-for="opt in langOptions"
+                >
+                    {{ opt.label }}
+                </button>
+            </div>
+        </div>
+
         <footer class="mt-10 text-gray-400 text-xs text-center">
             Inspirado no <a class="underline" href="https://nohello.net" target="_blank">nohello.net</a> • Criado por
-            Jonatas
+            <a class="underline" href="https://www.linkedin.com/in/jonatas-costa-dev/" rel="noopener noreferrer"
+               target="_blank">Jonatas</a>
         </footer>
     </main>
 </div>
@@ -65,11 +84,15 @@
                 const lang = (navs[0] || '').toLowerCase();
                 if (lang.startsWith('pt')) return 'pt';
                 if (lang.startsWith('en')) return 'en';
+                if (lang.startsWith('es')) return 'es';
+                if (lang.startsWith('fr')) return 'fr';
+                if (lang.startsWith('de')) return 'de';
                 return 'pt';
             }
 
             const translations = {
                 pt: {
+                    languageLabel: 'Idioma:',
                     title: 'Por favor, não mande mensagens quebradas.',
                     subtitle: 'Evite mandar uma linha por vez. Escreva sua mensagem de forma completa — é mais claro e educado.',
                     chatDemoTitle: 'Demonstração de chat 💬',
@@ -81,9 +104,10 @@
                     why3: 'Economiza tempo e demonstra empatia com o outro.',
                     why4: 'Melhora a comunicação em ambientes profissionais.',
                     messagesBad: ['Oi', 'Tudo bem?', 'Preciso te pedir um favor', 'Pode me ajudar?'],
-                    messagesGood: ['Oi, tudo bem? Preciso te pedir um favor pode me ajudar?']
+                    messagesGood: ['Oi, tudo bem? Preciso te pedir um favor. Pode me ajudar?']
                 },
                 en: {
+                    languageLabel: 'Language:',
                     title: "Please don't send broken messages.",
                     subtitle: 'Avoid sending one line at a time. Write your message completely — it’s clearer and more polite.',
                     chatDemoTitle: 'Chat demonstration 💬',
@@ -95,9 +119,62 @@
                     why3: 'Saves time and shows empathy for the other person.',
                     why4: 'Improves communication in professional settings.',
                     messagesBad: ['Hi', 'How are you?', 'I need to ask a favor', 'Can you help me?'],
-                    messagesGood: ['Hi, how are you? I need to ask a favor can you help me?']
+                    messagesGood: ['Hi, how are you? I need to ask a favor. Can you help me?']
+                },
+                es: {
+                    languageLabel: 'Idioma:',
+                    title: 'Por favor, no envíes mensajes fragmentados.',
+                    subtitle: 'Evita enviar una línea a la vez. Escribe tu mensaje completo — es más claro y cortés.',
+                    chatDemoTitle: 'Demostración de chat 💬',
+                    showGood: 'Mostrar exemplo bom ✅',
+                    showBad: 'Mostrar exemplo malo ❌',
+                    whyTitle: 'Por qué importa 💡',
+                    why1: 'Evita notificaciones e interrupciones innecesarias.',
+                    why2: 'Hace la conversación más fluida y fácil de leer.',
+                    why3: 'Ahorra tiempo y muestra empatía hacia la otra persona.',
+                    why4: 'Mejora la comunicación en entornos profesionales.',
+                    messagesBad: ['Hola', '¿Cómo estás?', 'Necesito pedirte un favor', '¿Me puedes ayudar?'],
+                    messagesGood: ['Hola, ¿cómo estás? Necesito pedirte un favor. ¿Me puedes ayudar?']
+                },
+                fr: {
+                    languageLabel: 'Langue :',
+                    title: "S'il vous plaît, n'envoyez pas de messages morcelés.",
+                    subtitle: 'Évitez d’envoyer une ligne à la fois. Écrivez votre message en entier — c’est plus clair et poli.',
+                    chatDemoTitle: 'Démonstration de chat 💬',
+                    showGood: 'Afficher bon exemple ✅',
+                    showBad: 'Afficher mauvais exemple ❌',
+                    whyTitle: 'Pourquoi c’est important 💡',
+                    why1: 'Évite les notifications et interruptions inutiles.',
+                    why2: 'Rend la conversation plus fluide et agréable à lire.',
+                    why3: 'Fait gagner du temps et montre de l’empathie envers l’autre.',
+                    why4: 'Améliore la communication en milieu professionnel.',
+                    messagesBad: ['Salut', 'Ça va?', "J'ai besoin de te demander une faveur", "Peux-tu m'aider?"],
+                    messagesGood: ["Salut, ça va? J'ai besoin de te demander une faveur. Peux-tu m'aider?"]
+                },
+                de: {
+                    languageLabel: 'Sprache:',
+                    title: 'Bitte sende keine zerpflückten Nachrichten.',
+                    subtitle: 'Vermeide es, eine Zeile nach der anderen zu senden. Schreibe deine Nachricht vollständig — das ist klarer und höflicher.',
+                    chatDemoTitle: 'Chat-Demonstration 💬',
+                    showGood: 'Gutes Beispiel zeigen ✅',
+                    showBad: 'Schlechtes Beispiel zeigen ❌',
+                    whyTitle: 'Warum es wichtig ist 💡',
+                    why1: 'Vermeidet unnötige Benachrichtigungen und Unterbrechungen.',
+                    why2: 'Macht das Gespräch flüssiger und leichter lesbar.',
+                    why3: 'Spart Zeit und zeigt Empathie gegenüber dem anderen.',
+                    why4: 'Verbessert die Kommunikation in professionellen Umgebungen.',
+                    messagesBad: ['Hi', 'Wie geht’s?', 'Ich muss dich um einen Gefallen bitten', 'Kannst du mir helfen?'],
+                    messagesGood: ['Hi, wie geht’s? Ich muss dich um einen Gefallen bitten. Kannst du mir helfen?']
                 }
             };
+
+            const langOptions = [
+                {code: 'pt', label: 'Português'},
+                {code: 'en', label: 'English'},
+                {code: 'es', label: 'Español'},
+                {code: 'fr', label: 'Français'},
+                {code: 'de', label: 'Deutsch'},
+            ];
 
             function t(key) {
                 return translations[currentLang.value][key] || key;
@@ -134,7 +211,7 @@
                 playChatDemo();
             });
 
-            return {t, currentMessages, showingBadExample, toggleChatExample, currentLang};
+            return {t, currentMessages, showingBadExample, toggleChatExample, currentLang, langOptions};
         }
     }).mount('#app');
 </script>
