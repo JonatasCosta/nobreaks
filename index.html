@@ -1,145 +1,154 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-  <meta charset="UTF-8">
-  <title>Sem Quebras</title>
-  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <title>No Breaks</title>
+    <link href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%232563eb'/><path d='M25 35h50v20H40l-15 15V35z' fill='%23ffffff'/></svg>"
+          rel="icon">
+    <meta content="#2563eb" name="theme-color">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 font-sans transition-colors">
-  <div id="app" class="min-h-screen flex flex-col items-center justify-center p-6">
-    <main class="text-center max-w-xl">
-      <h1 class="text-4xl font-bold mb-4">{{ t('title') }}</h1>
-      <p class="text-lg mb-8">{{ t('subtitle') }}</p>
-      
-      <div class="relative w-full bg-white dark:bg-gray-800 rounded-2xl shadow p-6 mb-10 overflow-hidden">
-        <h2 class="text-xl font-semibold mb-4">{{ t('chatDemoTitle') }}</h2>
-        <div class="border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900 p-4 h-64 overflow-y-auto flex flex-col space-y-2 font-mono text-sm leading-relaxed">
-          <div v-for="(msg, index) in currentMessages" :key="index" class="self-start bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-xl px-3 py-2 max-w-[80%] transition-all">
-            {{ msg }}
-          </div>
-        </div>
-        <div class="flex justify-center mt-6">
-          <button @click="toggleChatExample" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow text-sm">
-            {{ showingBadExample ? t('showGood') : t('showBad') }}
-          </button>
-        </div>
-      </div>
+<div class="min-h-screen flex flex-col items-center justify-center p-4 sm:p-6" id="app">
+    <main class="text-center max-w-full sm:max-w-xl px-4 sm:px-0">
+        <h1 class="text-3xl sm:text-4xl font-bold mb-4">{{ t('title') }}</h1>
+        <p class="text-base sm:text-lg mb-8">{{ t('subtitle') }}</p>
 
-      <section class="mt-8 text-left">
-        <h3 class="text-2xl font-semibold mb-3 text-center">{{ t('whyTitle') }}</h3>
-        <ul class="list-disc text-gray-700 dark:text-gray-300 text-sm space-y-2 max-w-md mx-auto">
-          <li>{{ t('why1') }}</li>
-          <li>{{ t('why2') }}</li>
-          <li>{{ t('why3') }}</li>
-          <li>{{ t('why4') }}</li>
-        </ul>
-      </section>
-      
-      <footer class="mt-10 text-gray-400 text-xs text-center">
-        Inspirado no <a href="https://nohello.net" target="_blank" class="underline">nohello.net</a> • Criado por Jonatas
-      </footer>
+        <div class="relative w-full bg-white dark:bg-gray-800 rounded-2xl shadow p-6 mb-10 overflow-hidden">
+            <h2 class="text-xl font-semibold mb-4">{{ t('chatDemoTitle') }}</h2>
+            <div class="border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900 p-4 h-48 sm:h-64 md:h-80 overflow-y-auto flex flex-col space-y-2 font-mono text-sm leading-relaxed">
+                <div :key="index" class="self-start bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-xl px-3 py-2 max-w-[90%] sm:max-w-[80%] transition-all break-words"
+                     v-for="(msg, index) in currentMessages">
+                    {{ msg }}
+                </div>
+            </div>
+            <div class="flex justify-center mt-6">
+                <button @click="toggleChatExample"
+                        class="px-3 sm:px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow text-sm">
+                    {{ showingBadExample ? t('showGood') : t('showBad') }}
+                </button>
+            </div>
+        </div>
+
+        <section class="mt-8 text-left">
+            <h3 class="text-2xl font-semibold mb-3 text-center">{{ t('whyTitle') }}</h3>
+            <ul class="list-disc text-gray-700 dark:text-gray-300 text-sm space-y-2 max-w-md mx-auto">
+                <li>{{ t('why1') }}</li>
+                <li>{{ t('why2') }}</li>
+                <li>{{ t('why3') }}</li>
+                <li>{{ t('why4') }}</li>
+            </ul>
+        </section>
+
+        <footer class="mt-10 text-gray-400 text-xs text-center">
+            Inspirado no <a class="underline" href="https://nohello.net" target="_blank">nohello.net</a> • Criado por
+            Jonatas
+        </footer>
     </main>
-  </div>
+</div>
 
-  <script>
-    const { createApp, ref, onMounted, watch } = Vue;
+<script>
+    const {createApp, ref, onMounted, watch} = Vue;
 
     createApp({
-      setup() {
-        const darkMode = ref(false);
-        const currentLang = ref('pt');
-        const showingBadExample = ref(true);
-        const currentMessages = ref([]);
-        let messageInterval = null;
+        setup() {
+            const darkMode = ref(false);
+            const currentLang = ref('pt');
+            const showingBadExample = ref(true);
+            const currentMessages = ref([]);
+            let messageInterval = null;
 
-        function detectBrowserLang() {
-          // tenta usar navigator.languages (uma lista de preferências) e depois navigator.language
-          const navs = (navigator.languages && navigator.languages.length) ? navigator.languages : [navigator.language || navigator.userLanguage || 'pt'];
-          const lang = (navs[0] || '').toLowerCase();
-          if (lang.startsWith('pt')) return 'pt';
-          if (lang.startsWith('en')) return 'en';
-          // fallback
-          return 'pt';
-        }
-
-        const translations = {
-          pt: {
-            title: 'Por favor, não mande mensagens quebradas.',
-            subtitle: 'Evite mandar uma linha por vez. Escreva sua mensagem de forma completa — é mais claro e educado.',
-            chatDemoTitle: 'Demonstração de chat 💬',
-            showGood: 'Mostrar exemplo bom ✅',
-            showBad: 'Mostrar exemplo ruim ❌',
-            whyTitle: 'Por que isso importa 💡',
-            why1: 'Evita notificações e interrupções desnecessárias.',
-            why2: 'Deixa a conversa mais fluida e agradável de ler.',
-            why3: 'Economiza tempo e demonstra empatia com o outro.',
-            why4: 'Melhora a comunicação em ambientes profissionais.',
-            messagesBad: ['Oi', 'Tudo bem?', 'Preciso te pedir um favor', 'Pode me ajudar?'],
-            messagesGood: ['Oi, tudo bem? Preciso te pedir um favor pode me ajudar?']
-          },
-          en: {
-            title: "Please don't send broken messages.",
-            subtitle: 'Avoid sending one line at a time. Write your message completely — it’s clearer and more polite.',
-            chatDemoTitle: 'Chat demonstration 💬',
-            showGood: 'Show good example ✅',
-            showBad: 'Show bad example ❌',
-            whyTitle: 'Why it matters 💡',
-            why1: 'Avoids unnecessary notifications and interruptions.',
-            why2: 'Makes the conversation smoother and easier to read.',
-            why3: 'Saves time and shows empathy for the other person.',
-            why4: 'Improves communication in professional settings.',
-            messagesBad: ['Hi', 'How are you?', 'I need to ask a favor', 'Can you help me?'],
-            messagesGood: ['Hi, how are you? I need to ask a favor can you help me?']
-          }
-        };
-
-        function t(key) {
-          return translations[currentLang.value][key] || key;
-        }
-
-        function playChatDemo() {
-          clearInterval(messageInterval);
-          currentMessages.value = [];
-          const lang = currentLang.value in translations ? currentLang.value : 'pt';
-          const selectedMessages = showingBadExample.value ? translations[lang].messagesBad : translations[lang].messagesGood;
-
-          let i = 0;
-          messageInterval = setInterval(() => {
-            if (i < selectedMessages.length) {
-              currentMessages.value.push(selectedMessages[i]);
-              i++;
-            } else {
-              clearInterval(messageInterval);
+            function detectBrowserLang() {
+                const navs = (navigator.languages && navigator.languages.length) ? navigator.languages : [navigator.language || navigator.userLanguage || 'pt'];
+                const lang = (navs[0] || '').toLowerCase();
+                if (lang.startsWith('pt')) return 'pt';
+                if (lang.startsWith('en')) return 'en';
+                return 'pt';
             }
-          }, 1000);
+
+            const translations = {
+                pt: {
+                    title: 'Por favor, não mande mensagens quebradas.',
+                    subtitle: 'Evite mandar uma linha por vez. Escreva sua mensagem de forma completa — é mais claro e educado.',
+                    chatDemoTitle: 'Demonstração de chat 💬',
+                    showGood: 'Mostrar exemplo bom ✅',
+                    showBad: 'Mostrar exemplo ruim ❌',
+                    whyTitle: 'Por que isso importa 💡',
+                    why1: 'Evita notificações e interrupções desnecessárias.',
+                    why2: 'Deixa a conversa mais fluida e agradável de ler.',
+                    why3: 'Economiza tempo e demonstra empatia com o outro.',
+                    why4: 'Melhora a comunicação em ambientes profissionais.',
+                    messagesBad: ['Oi', 'Tudo bem?', 'Preciso te pedir um favor', 'Pode me ajudar?'],
+                    messagesGood: ['Oi, tudo bem? Preciso te pedir um favor pode me ajudar?']
+                },
+                en: {
+                    title: "Please don't send broken messages.",
+                    subtitle: 'Avoid sending one line at a time. Write your message completely — it’s clearer and more polite.',
+                    chatDemoTitle: 'Chat demonstration 💬',
+                    showGood: 'Show good example ✅',
+                    showBad: 'Show bad example ❌',
+                    whyTitle: 'Why it matters 💡',
+                    why1: 'Avoids unnecessary notifications and interruptions.',
+                    why2: 'Makes the conversation smoother and easier to read.',
+                    why3: 'Saves time and shows empathy for the other person.',
+                    why4: 'Improves communication in professional settings.',
+                    messagesBad: ['Hi', 'How are you?', 'I need to ask a favor', 'Can you help me?'],
+                    messagesGood: ['Hi, how are you? I need to ask a favor can you help me?']
+                }
+            };
+
+            function t(key) {
+                return translations[currentLang.value][key] || key;
+            }
+
+            function playChatDemo() {
+                clearInterval(messageInterval);
+                currentMessages.value = [];
+                const lang = currentLang.value in translations ? currentLang.value : 'pt';
+                const selectedMessages = showingBadExample.value ? translations[lang].messagesBad : translations[lang].messagesGood;
+
+                let i = 0;
+                messageInterval = setInterval(() => {
+                    if (i < selectedMessages.length) {
+                        currentMessages.value.push(selectedMessages[i]);
+                        i++;
+                    } else {
+                        clearInterval(messageInterval);
+                    }
+                }, 1000);
+            }
+
+            function toggleChatExample() {
+                showingBadExample.value = !showingBadExample.value;
+                playChatDemo();
+            }
+
+            watch(currentLang, () => {
+                playChatDemo();
+            });
+
+            onMounted(() => {
+                currentLang.value = detectBrowserLang();
+                playChatDemo();
+            });
+
+            return {t, currentMessages, showingBadExample, toggleChatExample, currentLang};
         }
-
-        function toggleChatExample() {
-          showingBadExample.value = !showingBadExample.value;
-          playChatDemo();
-        }
-
-        watch(currentLang, () => {
-          playChatDemo();
-        });
-
-        onMounted(() => {
-          currentLang.value = detectBrowserLang();
-          playChatDemo();
-        });
-
-        return { t, currentMessages, showingBadExample, toggleChatExample, currentLang };
-      }
     }).mount('#app');
-  </script>
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-9RNCT8DE6N"></script>
+</script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-9RNCT8DE6N"></script>
 <script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+    window.dataLayer = window.dataLayer || [];
 
-  gtag('config', 'G-9RNCT8DE6N');
+    function gtag() {
+        dataLayer.push(arguments);
+    }
+
+    gtag('js', new Date());
+
+    gtag('config', 'G-9RNCT8DE6N');
 </script>
 </body>
 </html>
