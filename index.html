@@ -19,8 +19,9 @@
         <div class="relative w-full bg-white dark:bg-gray-800 rounded-2xl shadow p-6 mb-10 overflow-hidden">
             <h2 class="text-xl font-semibold mb-4">{{ t('chatDemoTitle') }}</h2>
             <div class="border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900 p-4 h-48 sm:h-64 md:h-80 overflow-y-auto flex flex-col space-y-2 font-mono text-sm leading-relaxed">
-                <div :key="index" class="self-start bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-xl px-3 py-2 max-w-[90%] sm:max-w-[80%] transition-all break-words"
-                     v-for="(msg, index) in currentMessages">
+                <div :key="idx"
+                     class="self-start bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-xl px-3 py-2 max-w-[90%] sm:max-w-[80%] transition-all break-words text-left"
+                     v-for="(msg, idx) in currentMessages">
                     {{ msg }}
                 </div>
             </div>
@@ -54,7 +55,6 @@
 
     createApp({
         setup() {
-            const darkMode = ref(false);
             const currentLang = ref('pt');
             const showingBadExample = ref(true);
             const currentMessages = ref([]);
